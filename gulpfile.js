@@ -1,18 +1,32 @@
 const { src, dest, parallel, series, watch, task } = require('gulp');
-var scss = require('gulp-sass')
+const scss = require('gulp-sass')
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify-es').default;
+const browserSync = require('browser-sync').create();
 
-
-var browserSync = require('browser-sync').create();
 // Определяем логику работы Browsersync
 function browsersync() {
     browserSync.init({ // Инициализация Browsersync
-        server: { baseDir: 'app/' }, // Указываем папку сервера
+        server: { baseDir: 'src/' }, // Указываем папку сервера
         notify: false, // Отключаем уведомления
         online: true // Режим работы: true или false
     })
 }
 
-task('scss', () => {
+exports.browsersync = browsersync;
+
+function scripts() {
+    return src([ // Берем файлы из источников
+        'node_modules/jquery/dist/jquery.min.js', // Пример подключения библиотеки
+        'app/js/app.js', // Пользовательские скрипты, использующие библиотеку, должны быть подключены в конце
+    ])
+        .pipe(concat('app.min.js')) // Конкатенируем в один файл
+        .pipe(uglify()) // Сжимаем JavaScript
+        .pipe(dest('app/js/')) // Выгружаем готовый файл в папку назначения
+        .pipe(browserSync.stream()) // Триггерим Browsersync для обновления страницы
+}
+
+/* task('scss', () => {
     return src('scss/*.scss')
         .pipe(scss())
         .pipe(dest('css'))
@@ -73,4 +87,4 @@ task('sass', function () {
         .pipe(browserSync.stream());
 });
 
-task('default', ['serve']);
+task('default', ['serve']); */
